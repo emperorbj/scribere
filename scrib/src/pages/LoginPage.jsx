@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { UserContext } from "../UserContext";
 import { CiUser, CiLock } from "react-icons/ci";
-import {AiOutlineEye,AiOutlineEyeInvisible} from "react-icons/ai"
+import {AiOutlineEye,AiOutlineEyeInvisible, AiOutlineLoading3Quarters} from "react-icons/ai"
 import { toast, Toaster } from "sonner";
 
 export default function LoginPage() {
@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [redirect, setRedirect] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   function handlePassword(){
     setShowPassword(!showPassword)
@@ -19,12 +20,18 @@ export default function LoginPage() {
   const { setUserInfo } = useContext(UserContext);
   async function login(ev) {
     ev.preventDefault();
+    setLoading(true);
     const response = await fetch('http://localhost:3000/login', {
       method: 'POST',
       body: JSON.stringify({ username, password }),
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
     });
+
+
+    setLoading(false);
+
+
     if (response.ok) {
       response.json()
       // THE RESPONSE CONVERTED TO JSON AND THEN RESOLVED
@@ -84,7 +91,13 @@ export default function LoginPage() {
             </div>
         </div>
         <button className="bg-orange-500 py-3 hover:bg-orange-400
-        transition-all duration-500 text-bold text-white">Login</button>
+        transition-all duration-500 text-bold text-white flex items-center justify-center"
+        disabled={loading}>
+        {loading ? (
+          <AiOutlineLoading3Quarters className='animate-spin h-6 w-6' /> // <-- Spinner icon
+        ) : (
+          'Login'
+        )}</button>
       </form>
     </div>
   );

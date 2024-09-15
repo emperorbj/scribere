@@ -11,7 +11,7 @@ export default function Post({ _id, title, summary, cover, content, createdAt, a
       <div className="w-full h-64 overflow-hidden">
         <Link to={`/post/${_id}`}>
           <img
-            src={'http://localhost:3000/' + cover}
+            src={cover}
             alt="cover"
             className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
           />

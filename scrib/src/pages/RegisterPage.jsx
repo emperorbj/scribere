@@ -2,12 +2,13 @@ import { useState } from "react";
 import { toast, Toaster } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { CiUser, CiLock } from "react-icons/ci";
-import {AiOutlineEye,AiOutlineEyeInvisible} from "react-icons/ai"
+import {AiOutlineEye,AiOutlineEyeInvisible, AiOutlineLoading3Quarters} from "react-icons/ai"
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
 
@@ -19,11 +20,17 @@ export default function RegisterPage() {
 
   async function register(ev) {
     ev.preventDefault();
+    setLoading(true);
     const response = await fetch('http://localhost:3000/register', {
       method: 'POST',
       body: JSON.stringify({ username, password }),
       headers: { 'Content-Type': 'application/json' },
     });
+
+
+    setLoading(false);
+
+
     if (response.status === 200) {
       toast.success('Registration successful! Redirecting to Login...', {
         duration: 2000,
@@ -74,7 +81,14 @@ export default function RegisterPage() {
         </div>
 
         <button className="bg-purple-500 py-3 hover:bg-purple-400
-        transition-all duration-500 text-white text-bold">Register</button>
+        transition-all duration-500 text-white text-bold flex items-center justify-center"
+        disabled={loading}>
+        {loading ? (
+          <AiOutlineLoading3Quarters className='animate-spin h-6 w-6' /> // <-- Spinner icon
+        ) : (
+          'Login'
+        )}
+        </button>
 
       </form>
     </div>

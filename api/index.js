@@ -8,8 +8,36 @@ const app = express();
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+
+
 const multer = require('multer');
-const uploadMiddleware = multer({ dest: 'uploads/' });
+
+// const storage = multer.memoryStorage(); // Use memory storage instead of disk storage
+// const upload = multer({ storage: storage });
+
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Set up Cloudinary storage for multer
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'uploads', // Folder name in Cloudinary
+    allowed_formats: ['jpg', 'jpeg', 'png'], // Allowed file types
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// const uploadMiddleware = multer({ dest: 'uploads/' });
+
 const fs = require('fs');
 const port = 3000;
 
@@ -20,7 +48,7 @@ app.use(cors({credentials:true,origin:'http://localhost:5173'}));
 // app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
-app.use('/uploads', express.static(__dirname + '/uploads'));
+// app.use('/uploads', express.static(__dirname + '/uploads'));
 
 mongoose.connect(process.env.MONGODB_CONNECTION_URI)
 .then(()=>{
@@ -77,59 +105,108 @@ app.post('/logout', (req,res) => {
   res.cookie('token', '').json('ok');
 });
 
-app.post('/post', uploadMiddleware.single('file'), async (req,res) => {
-  const {originalname,path} = req.file;
-  const parts = originalname.split('.');
-  const ext = parts[parts.length - 1];
-  const newPath = path+'.'+ext;
-  fs.renameSync(path, newPath);
 
-  const {token} = req.cookies;
-  jwt.verify(token, secret, {}, async (err,info) => {
+
+
+// app.post('/post', upload.single('file'), async (req,res) => {
+//   const {originalname,path} = req.file;
+//   const parts = originalname.split('.');
+//   const ext = parts[parts.length - 1];
+//   const newPath = path+'.'+ext;
+//   fs.renameSync(path, newPath);
+
+//   const {token} = req.cookies;
+//   jwt.verify(token, secret, {}, async (err,info) => {
+//     if (err) throw err;
+//     const {title,summary,content} = req.body;
+//     const postDoc = await Post.create({
+//       title,
+//       summary,
+//       content,
+//       cover:newPath,
+//       author:info.id,
+//     });
+//     res.json(postDoc);
+//   });
+
+// });
+
+// app.put('/post',uploadMiddleware.single('file'), async (req,res) => {
+//   let newPath = null;
+//   if (req.file) {
+//     const {originalname,path} = req.file;
+//     const parts = originalname.split('.');
+//     const ext = parts[parts.length - 1];
+//     newPath = path+'.'+ext;
+//     fs.renameSync(path, newPath);
+//   }
+
+//   const {token} = req.cookies;
+//   jwt.verify(token, secret, {}, async (err,info) => {
+//     if (err) throw err;
+//     const {id,title,summary,content} = req.body;
+//     const postDoc = await Post.findById(id);
+//     const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
+//     if (!isAuthor) {
+//       return res.status(400).json('you are not the author');
+//     }
+//     await postDoc.update({
+//       title,
+//       summary,
+//       content,
+//       cover: newPath ? newPath : postDoc.cover,
+//     });
+
+//     res.json(postDoc);
+//   });
+
+// });
+
+app.post('/post', upload.single('file'), async (req, res) => {
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
-    const {title,summary,content} = req.body;
+    const { title, summary, content } = req.body;
     const postDoc = await Post.create({
       title,
       summary,
       content,
-      cover:newPath,
-      author:info.id,
+      cover: req.file.path, // Use the path returned by Cloudinary
+      author: info.id,
     });
     res.json(postDoc);
   });
-
 });
 
-app.put('/post',uploadMiddleware.single('file'), async (req,res) => {
-  let newPath = null;
-  if (req.file) {
-    const {originalname,path} = req.file;
-    const parts = originalname.split('.');
-    const ext = parts[parts.length - 1];
-    newPath = path+'.'+ext;
-    fs.renameSync(path, newPath);
-  }
-
-  const {token} = req.cookies;
-  jwt.verify(token, secret, {}, async (err,info) => {
+app.put('/post', upload.single('file'), async (req, res) => {
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
-    const {id,title,summary,content} = req.body;
+    const { id, title, summary, content } = req.body;
     const postDoc = await Post.findById(id);
     const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
     if (!isAuthor) {
-      return res.status(400).json('you are not the author');
+      return res.status(400).json('You are not the author');
     }
-    await postDoc.update({
+
+    const updatedData = {
       title,
       summary,
       content,
-      cover: newPath ? newPath : postDoc.cover,
-    });
+    };
 
+    if (req.file) {
+      updatedData.cover = req.file.path; // Update cover with Cloudinary path
+    }
+
+    await postDoc.update(updatedData);
     res.json(postDoc);
   });
-
 });
+
+
+
+
 
 
 // ENDPOINT FOR GETTING ALL THE POSTS FROM THE DATABASE

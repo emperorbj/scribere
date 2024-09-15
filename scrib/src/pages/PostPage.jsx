@@ -44,7 +44,7 @@ export default function PostPage() {
 
     <div className="mb-8">
       <img
-        src={`http://localhost:3000/${postInfo.cover}`}
+        src={postInfo.cover}
         alt={postInfo.title}
         className="rounded-lg w-full h-[400px] object-cover shadow-md"
       />
