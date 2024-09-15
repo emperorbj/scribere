@@ -55,7 +55,6 @@ export default function LoginPage() {
       });
       setLoading(false);
       console.log(error);
-      setRedirect(false)
     }
   }
 
@@ -63,9 +62,7 @@ export default function LoginPage() {
   if (redirect) {
     return <Navigate to={'/'} />
   }
-  if (!redirect) {
-    return <Navigate to={'/register'} />
-  }
+
 
 
   return (
