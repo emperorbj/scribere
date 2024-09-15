@@ -5,6 +5,10 @@ const User = require('./models/User');
 const Post = require('./models/Post');
 const bcrypt = require('bcryptjs');
 const app = express();
+app.use(cors({
+  credentials: true,
+  origin: ['https://scrib-eight.vercel.app'], // Your frontend's URL without the trailing slash
+}));
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -44,7 +48,7 @@ const port = 3000;
 const salt = bcrypt.genSaltSync(10);
 const secret = 'asdfe45we45w345wegw345werjktjwertkj';
 
-app.use(cors({credentials:true,origin:'https://scrib-eight.vercel.app/'}));
+
 // app.use(cors());
 app.use(express.json());
 app.use(cookieParser());

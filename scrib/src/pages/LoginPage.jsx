@@ -21,34 +21,35 @@ export default function LoginPage() {
   async function login(ev) {
     ev.preventDefault();
     setLoading(true);
-    const response = await fetch('https://scriberebackend.vercel.app/login', {
-      method: 'POST',
-      body: JSON.stringify({ username, password }),
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    });
-
-
-    setLoading(false);
-
-
-    if (response.ok) {
-      response.json()
-      // THE RESPONSE CONVERTED TO JSON AND THEN RESOLVED
-      // AND SENT INTO A NEW VARIABLE userInfo(which has the same name as our 
-      // global userInfo state variable)
-      .then(userInfo => {
-        setUserInfo(userInfo);
-        setRedirect(true);
-        console.log(response);
-
+      const response = await fetch('https://scriberebackend.vercel.app/login', {
+        method: 'POST',
+        body: JSON.stringify({ username, password }),
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
-    } else {
-      toast.error('wrong email or password...', {
-        duration: 2000,
-      });
-    }
-  }
+  
+  
+      setLoading(false);
+  
+  
+      if (response.ok) {
+        response.json()
+        // THE RESPONSE CONVERTED TO JSON AND THEN RESOLVED
+        // AND SENT INTO A NEW VARIABLE userInfo(which has the same name as our 
+        // global userInfo state variable)
+        .then(userInfo => {
+          setUserInfo(userInfo);
+          setRedirect(true);
+          console.log(response);
+  
+        });
+      } else {
+        toast.error('wrong email or password...', {
+          duration: 2000,
+        });
+      }
+    } 
+
 
   if (redirect) {
     return <Navigate to={'/'} />
