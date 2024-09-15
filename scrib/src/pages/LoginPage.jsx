@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { UserContext } from "../UserContext";
 import { CiUser, CiLock } from "react-icons/ci";
-import {AiOutlineEye,AiOutlineEyeInvisible, AiOutlineLoading3Quarters} from "react-icons/ai"
+import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineLoading3Quarters } from "react-icons/ai"
 import { toast, Toaster } from "sonner";
 
 export default function LoginPage() {
@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  function handlePassword(){
+  function handlePassword() {
     setShowPassword(!showPassword)
   }
 
@@ -21,34 +21,42 @@ export default function LoginPage() {
   async function login(ev) {
     ev.preventDefault();
     setLoading(true);
+    try {
       const response = await fetch('https://scriberebackend.vercel.app/login', {
         method: 'POST',
         body: JSON.stringify({ username, password }),
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
       });
-  
-  
+
+
       setLoading(false);
-  
-  
+
+
       if (response.ok) {
         response.json()
-        // THE RESPONSE CONVERTED TO JSON AND THEN RESOLVED
-        // AND SENT INTO A NEW VARIABLE userInfo(which has the same name as our 
-        // global userInfo state variable)
-        .then(userInfo => {
-          setUserInfo(userInfo);
-          setRedirect(true);
-          console.log(response);
-  
-        });
+          // THE RESPONSE CONVERTED TO JSON AND THEN RESOLVED
+          // AND SENT INTO A NEW VARIABLE userInfo(which has the same name as our 
+          // global userInfo state variable)
+          .then(userInfo => {
+            setUserInfo(userInfo);
+            setRedirect(true);
+            console.log(response);
+
+          });
       } else {
         toast.error('wrong email or password...', {
           duration: 2000,
         });
       }
-    } 
+    } catch (error) {
+      toast.error('wrong email or password...', {
+        duration: 2000,
+      });
+      setLoading(false);
+      console.log(error);
+    }
+  }
 
 
   if (redirect) {
@@ -87,18 +95,18 @@ export default function LoginPage() {
             className="py-3 pl-2 border-none outline-none bg-white"
             value={password}
             onChange={e => setPassword(e.target.value)} />
-            <div onClick={handlePassword}>
-              {showPassword  ? <AiOutlineEye className="h-6 w-6 mr-2"/> :  <AiOutlineEyeInvisible className="h-6 w-6 mr-2"/>}
-            </div>
+          <div onClick={handlePassword}>
+            {showPassword ? <AiOutlineEye className="h-6 w-6 mr-2" /> : <AiOutlineEyeInvisible className="h-6 w-6 mr-2" />}
+          </div>
         </div>
         <button className="bg-orange-500 py-3 hover:bg-orange-400
         transition-all duration-500 text-bold text-white flex items-center justify-center"
-        disabled={loading}>
-        {loading ? (
-          <AiOutlineLoading3Quarters className='animate-spin h-6 w-6' /> // <-- Spinner icon
-        ) : (
-          'Login'
-        )}</button>
+          disabled={loading}>
+          {loading ? (
+            <AiOutlineLoading3Quarters className='animate-spin h-6 w-6' /> // <-- Spinner icon
+          ) : (
+            'Login'
+          )}</button>
       </form>
     </div>
   );
