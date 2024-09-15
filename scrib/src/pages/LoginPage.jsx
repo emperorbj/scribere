@@ -50,11 +50,12 @@ export default function LoginPage() {
         });
       }
     } catch (error) {
-      toast.error('wrong email or password...', {
+      toast.error('Error! Please ensure you register...', {
         duration: 2000,
       });
       setLoading(false);
       console.log(error);
+      setRedirect(false)
     }
   }
 
@@ -62,6 +63,11 @@ export default function LoginPage() {
   if (redirect) {
     return <Navigate to={'/'} />
   }
+  if (!redirect) {
+    return <Navigate to={'/register'} />
+  }
+
+
   return (
     <div className="flex items-center justify-center h-full">
       <Toaster richColors position="top-center" />
