@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs');
 const app = express();
 app.use(cors({
   credentials: true,
-  origin: ['https://scrib-eight.vercel.app'], // Your frontend's URL without the trailing slash
+  origin: 'https://scrib-eight.vercel.app', // Your frontend's URL without the trailing slash
 }));
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
