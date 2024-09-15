@@ -8,7 +8,7 @@ const PLACES = ['top-end'];
 export default function Header() {
   const {setUserInfo,userInfo} = useContext(UserContext);
   useEffect(() => {
-    fetch('http://localhost:3000/profile', {
+    fetch('https://scriberebackend.vercel.app/profile', {
       credentials: 'include',
     }).then(response => {
       response.json().then(userInfo => {
@@ -18,7 +18,7 @@ export default function Header() {
   }, []);
 
   function logout() {
-    fetch('http://localhost:3000/logout', {
+    fetch('https://scriberebackend.vercel.app/logout', {
       credentials: 'include',
       method: 'POST',
     });

@@ -23,7 +23,7 @@ export default function CreatePost() {
     data.set('file', files[0]);
     ev.preventDefault();
     setLoading(true);
-    const response = await fetch('http://localhost:3000/post', {
+    const response = await fetch('https://scriberebackend.vercel.app/post', {
       method: 'POST',
       body: data,
       credentials: 'include',

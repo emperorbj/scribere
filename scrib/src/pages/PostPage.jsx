@@ -8,7 +8,7 @@ export default function PostPage() {
   const {userInfo} = useContext(UserContext);
   const {id} = useParams();
   useEffect(() => {
-    fetch(`http://localhost:3000/post/${id}`)
+    fetch(`https://scriberebackend.vercel.app/post/${id}`)
       .then(response => {
         response.json().then(postInfo => {
           console.log(postInfo);

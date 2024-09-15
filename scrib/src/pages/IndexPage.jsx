@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 export default function IndexPage() {
   const [posts, setPosts] = useState([]);
   useEffect(() => {
-    fetch('http://localhost:3000/post')
+    fetch('https://scriberebackend.vercel.app/post')
     .then(response => {
       response.json()
       .then(posts => {
