@@ -1,31 +1,20 @@
 const express = require('express');
-const mongoose = require("mongoose");
 const cors = require('cors');
-const app = express();
-app.use(cors({
-  credentials: true,
-  origin: ['https://scrib-eight.vercel.app'] // Your frontend's URL without the trailing slash
-}));
-
-
-
-
-
+const mongoose = require("mongoose");
 const User = require('./models/User');
 const Post = require('./models/Post');
 const bcrypt = require('bcryptjs');
-
-
-
-
+const app = express();
+app.use(cors({
+  credentials: true,
+  origin: ['https://scrib-eight.vercel.app'], // Your frontend's URL without the trailing slash
+}));
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 
 
 const multer = require('multer');
-
-
 
 // const storage = multer.memoryStorage(); // Use memory storage instead of disk storage
 // const upload = multer({ storage: storage });
@@ -53,7 +42,7 @@ const upload = multer({ storage: storage });
 
 // const uploadMiddleware = multer({ dest: 'uploads/' });
 
-// const fs = require('fs');
+const fs = require('fs');
 const port = 3000;
 
 const salt = bcrypt.genSaltSync(10);
@@ -178,7 +167,6 @@ app.post('/logout', (req,res) => {
 // });
 
 app.post('/post', upload.single('file'), async (req, res) => {
-
   const { token } = req.cookies;
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
