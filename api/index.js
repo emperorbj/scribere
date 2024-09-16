@@ -5,12 +5,17 @@ const User = require('./models/User');
 const Post = require('./models/Post');
 const bcrypt = require('bcryptjs');
 const app = express();
+// app.use(cors({
+//   credentials: true,
+//   origin: 'https://scrib-eight.vercel.app',
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   allowedHeaders: ['Content-Type', 'Authorization'] // Your frontend's URL without the trailing slash
+// }));
+
 app.use(cors({
-  credentials: true,
-  origin: 'https://scrib-eight.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'] // Your frontend's URL without the trailing slash
+  origin: '*', // [CHANGED] Allow all origins (use with caution)
 }));
+
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
