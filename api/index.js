@@ -1,20 +1,24 @@
 const express = require('express');
 const cors = require('cors');
+const app = express();
+app.use(cors({
+  credentials: true,
+  origin: 'https://scrib-eight.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Your frontend's URL without the trailing slash
+}));
 const mongoose = require("mongoose");
 const User = require('./models/User');
 const Post = require('./models/Post');
 const bcrypt = require('bcryptjs');
-const app = express();
-// app.use(cors({
-//   credentials: true,
-//   origin: 'https://scrib-eight.vercel.app',
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   allowedHeaders: ['Content-Type', 'Authorization'] // Your frontend's URL without the trailing slash
-// }));
 
-app.use(cors({
-  origin: '*', // [CHANGED] Allow all origins (use with caution)
-}));
+
+
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', 'https://scrib-eight.vercel.app');
+//   res.header('Access-Control-Allow-Credentials', 'true');
+//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+//   next();
+// });
 
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
@@ -23,12 +27,7 @@ const cookieParser = require('cookie-parser');
 
 const multer = require('multer');
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://scrib-eight.vercel.app');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-});
+
 
 // const storage = multer.memoryStorage(); // Use memory storage instead of disk storage
 // const upload = multer({ storage: storage });
