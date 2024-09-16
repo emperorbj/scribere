@@ -55,7 +55,7 @@ const upload = multer({ storage: storage });
 
 // const uploadMiddleware = multer({ dest: 'uploads/' });
 
-const fs = require('fs');
+// const fs = require('fs');
 const port = 3000;
 
 const salt = bcrypt.genSaltSync(10);
