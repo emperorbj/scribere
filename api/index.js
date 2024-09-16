@@ -1,10 +1,10 @@
 const express = require('express');
+const mongoose = require("mongoose");
 const cors = require('cors');
 const app = express();
 app.use(cors({
   credentials: true,
-  origin: ['https://scrib-eight.vercel.app'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'] // Your frontend's URL without the trailing slash
+  origin: ['https://scrib-eight.vercel.app'] // Your frontend's URL without the trailing slash
 }));
 
 app.use((req, res, next) => {
@@ -15,19 +15,13 @@ app.use((req, res, next) => {
 });
 
 
-const mongoose = require("mongoose");
+
 const User = require('./models/User');
 const Post = require('./models/Post');
 const bcrypt = require('bcryptjs');
 
 
 
-// app.use((req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', 'https://scrib-eight.vercel.app');
-//   res.header('Access-Control-Allow-Credentials', 'true');
-//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-//   next();
-// });
 
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
