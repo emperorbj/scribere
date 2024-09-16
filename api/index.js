@@ -7,7 +7,9 @@ const bcrypt = require('bcryptjs');
 const app = express();
 app.use(cors({
   credentials: true,
-  origin: 'https://scrib-eight.vercel.app', // Your frontend's URL without the trailing slash
+  origin: 'https://scrib-eight.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'] // Your frontend's URL without the trailing slash
 }));
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
@@ -15,6 +17,13 @@ const cookieParser = require('cookie-parser');
 
 
 const multer = require('multer');
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://scrib-eight.vercel.app');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 
 // const storage = multer.memoryStorage(); // Use memory storage instead of disk storage
 // const upload = multer({ storage: storage });
@@ -167,8 +176,8 @@ app.post('/logout', (req,res) => {
 // });
 
 app.post('/post', upload.single('file'), async (req, res) => {
-  
-  const { token } = req.cookies('token', token,{ httpOnly: true, secure: false });
+
+  const { token } = req.cookies;
   jwt.verify(token, secret, {}, async (err, info) => {
     if (err) throw err;
     const { title, summary, content } = req.body;
