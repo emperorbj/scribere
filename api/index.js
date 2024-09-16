@@ -3,9 +3,18 @@ const cors = require('cors');
 const app = express();
 app.use(cors({
   credentials: true,
-  origin: 'https://scrib-eight.vercel.app',
+  origin: ['https://scrib-eight.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Your frontend's URL without the trailing slash
 }));
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://scrib-eight.vercel.app');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+
+
 const mongoose = require("mongoose");
 const User = require('./models/User');
 const Post = require('./models/Post');
