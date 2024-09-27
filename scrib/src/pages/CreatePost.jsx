@@ -27,6 +27,7 @@ export default function CreatePost() {
       method: 'POST',
       body: data,
       credentials: 'include',
+      mode: 'cors'
     });
 
     setLoading(false);
