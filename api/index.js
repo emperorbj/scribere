@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+app.options('*', cors());
 const mongoose = require("mongoose");
 const User = require('./models/User');
 const Post = require('./models/Post');
@@ -85,7 +86,7 @@ app.post('/login', async (req,res) => {
     jwt.sign({username, id:userDoc._id} , secret, {}, (err,token) => {
       if (err) throw err;
       // ELSE
-      res.cookie('token', token,{ httpOnly: true, secure: true,  sameSite: 'None' }).json({
+      res.cookie('token', token,{ httpOnly: true, secure: false,  sameSite: 'None' }).json({
         id:userDoc._id,
         username,
       });
