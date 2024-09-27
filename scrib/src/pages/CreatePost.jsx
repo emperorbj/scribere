@@ -16,30 +16,57 @@ export default function CreatePost() {
 
 
   async function createNewPost(ev) {
+    ev.preventDefault();
+    const token = localStorage.getItem('token'); // Retrieve token from localStorage
+  
     const data = new FormData();
     data.set('title', title);
     data.set('summary', summary);
     data.set('content', content);
     data.set('file', files[0]);
-    ev.preventDefault();
     setLoading(true);
     const response = await fetch('https://scriberebackend.vercel.app/post', {
       method: 'POST',
       body: data,
-      credentials: 'include',
       headers: {
-        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`, // Set the Authorization header
       },
-      mode: 'cors'
     });
 
     setLoading(false);
-
-
+  
     if (response.ok) {
       setRedirect(true);
     }
   }
+  
+
+
+  // async function createNewPost(ev) {
+  //   const data = new FormData();
+  //   data.set('title', title);
+  //   data.set('summary', summary);
+  //   data.set('content', content);
+  //   data.set('file', files[0]);
+  //   ev.preventDefault();
+  //   setLoading(true);
+  //   const response = await fetch('https://scriberebackend.vercel.app/post', {
+  //     method: 'POST',
+  //     body: data,
+  //     credentials: 'include',
+  //     headers: {
+  //       'Accept': 'application/json',
+  //     },
+  //     mode: 'cors'
+  //   });
+
+  //   setLoading(false);
+
+
+  //   if (response.ok) {
+  //     setRedirect(true);
+  //   }
+  // }
 
   if (redirect) {
     return <Navigate to={'/'} />

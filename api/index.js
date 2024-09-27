@@ -1,21 +1,29 @@
 const express = require('express');
 const cors = require('cors');
-app.options('*', cors());
 const mongoose = require("mongoose");
 const User = require('./models/User');
 const Post = require('./models/Post');
 const bcrypt = require('bcryptjs');
 const app = express();
-app.use(cors({
-  credentials: true,
-  origin: 'https://scrib-eight.vercel.app',
-}));
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const cookieParser = require('cookie-parser');
-
-
 const multer = require('multer');
+//const cookieParser = require('cookie-parser');
+//app.use(express.json())
+//app.use(cookieParser());
+// app.use(cors({
+//   credentials: true,
+//   origin: 'https://scrib-eight.vercel.app',
+// }));
+
+app.use(express.json());
+app.use(cors({
+  origin: 'https://scrib-eight.vercel.app', // Allow your frontend URL
+  optionsSuccessStatus: 200, // For legacy browsers
+}))
+
+
+
 
 // const storage = multer.memoryStorage(); // Use memory storage instead of disk storage
 // const upload = multer({ storage: storage });
@@ -41,7 +49,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage: storage });
 
-// const uploadMiddleware = multer({ dest: 'uploads/' });
+
 
 const fs = require('fs');
 const port = 3000;
@@ -50,10 +58,8 @@ const salt = bcrypt.genSaltSync(10);
 const secret = 'asdfe45we45w345wegw345werjktjwertkj';
 
 
-// app.use(cors());
-app.use(express.json());
-app.use(cookieParser());
-// app.use('/uploads', express.static(__dirname + '/uploads'));
+
+
 
 mongoose.connect(process.env.MONGODB_CONNECTION_URI)
 .then(()=>{
@@ -74,140 +80,160 @@ app.post('/register', async (req,res) => {
   }
 });
 
-app.post('/login', async (req,res) => {
-  const {username,password} = req.body;
-  const userDoc = await User.findOne({username});
-  // compares password provided by user to the 
-  // password stored in the database
+// app.post('/login', async (req,res) => {
+//   const {username,password} = req.body;
+//   const userDoc = await User.findOne({username});
+//   // compares password provided by user to the 
+//   // password stored in the database
+//   const passOk = bcrypt.compareSync(password, userDoc.password);
+//   if (passOk) {
+//     // logged in
+//     // when user is logged in we generate a token for the user
+//     jwt.sign({username, id:userDoc._id} , secret, {}, (err,token) => {
+//       if (err) throw err;
+//       // ELSE
+//       res.cookie('token', token,{ httpOnly: true, secure: false,  sameSite: 'None' }).json({
+//         id:userDoc._id,
+//         username,
+//       });
+//     });
+    
+    
+//   } else {
+//     res.status(400).json('wrong credentials');
+//   }
+// });
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const userDoc = await User.findOne({ username });
   const passOk = bcrypt.compareSync(password, userDoc.password);
   if (passOk) {
-    // logged in
-    // when user is logged in we generate a token for the user
-    jwt.sign({username, id:userDoc._id} , secret, {}, (err,token) => {
+    jwt.sign({ username, id: userDoc._id }, secret, {}, (err, token) => {
       if (err) throw err;
-      // ELSE
-      res.cookie('token', token,{ httpOnly: true, secure: false,  sameSite: 'None' }).json({
-        id:userDoc._id,
+      res.json({
+        id: userDoc._id,
         username,
+        token, // Return the token in the response
       });
     });
-    
-    
   } else {
     res.status(400).json('wrong credentials');
   }
 });
 
-app.get('/profile', (req,res) => {
-  const {token} = req.cookies;
-  jwt.verify(token, secret, {}, (err,info) => {
-    if (err) throw err;
-    res.json(info);
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Extract token from header
+  if (token == null) return res.sendStatus(401);
+
+  jwt.verify(token, secret, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user; // Attach user information to the request object
+    next();
   });
+}
+
+// Example of using the middleware in a protected route
+app.get('/profile', authenticateToken, (req, res) => {
+  res.json(req.user);
 });
+
+
+// app.get('/profile', (req,res) => {
+//   const {token} = req.cookies;
+//   jwt.verify(token, secret, {}, (err,info) => {
+//     if (err) throw err;
+//     res.json(info);
+//   });
+// });
 
 app.post('/logout', (req,res) => {
-  res.cookie('token', '').json('ok');
+  res.json('ok');
 });
 
 
 
 
-// app.post('/post', upload.single('file'), async (req,res) => {
-//   const {originalname,path} = req.file;
-//   const parts = originalname.split('.');
-//   const ext = parts[parts.length - 1];
-//   const newPath = path+'.'+ext;
-//   fs.renameSync(path, newPath);
+app.post('/post', authenticateToken, upload.single('file'), async (req, res) => {
+  const { title, summary, content } = req.body;
+  const postDoc = await Post.create({
+    title,
+    summary,
+    content,
+    cover: req.file.path,
+    author: req.user.id, // Use req.user to get the user info
+  });
+  res.json(postDoc);
+});
 
-//   const {token} = req.cookies;
-//   jwt.verify(token, secret, {}, async (err,info) => {
+app.put('/post', authenticateToken, upload.single('file'), async (req, res) => {
+  const { id, title, summary, content } = req.body;
+  const postDoc = await Post.findById(id);
+  const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(req.user.id);
+  if (!isAuthor) {
+    return res.status(400).json('You are not the author');
+  }
+
+  const updatedData = { title, summary, content };
+  if (req.file) {
+    updatedData.cover = req.file.path; // Update cover with Cloudinary path
+  }
+
+  await postDoc.update(updatedData);
+  res.json(postDoc);
+});
+
+
+
+
+// app.post('/post', upload.single('file'), async (req, res) => {
+//   const { token } = req.cookies;
+//   jwt.verify(token, secret, {}, async (err, info) => {
 //     if (err) throw err;
-//     const {title,summary,content} = req.body;
+//     const { title, summary, content } = req.body;
 //     const postDoc = await Post.create({
 //       title,
 //       summary,
 //       content,
-//       cover:newPath,
-//       author:info.id,
+//       cover: req.file.path, // Use the path returned by Cloudinary
+//       author: info.id,
 //     });
 //     res.json(postDoc);
 //   });
-
 // });
 
-// app.put('/post',uploadMiddleware.single('file'), async (req,res) => {
-//   let newPath = null;
-//   if (req.file) {
-//     const {originalname,path} = req.file;
-//     const parts = originalname.split('.');
-//     const ext = parts[parts.length - 1];
-//     newPath = path+'.'+ext;
-//     fs.renameSync(path, newPath);
-//   }
-
-//   const {token} = req.cookies;
-//   jwt.verify(token, secret, {}, async (err,info) => {
+// app.put('/post', upload.single('file'), async (req, res) => {
+//   const { token } = req.cookies;
+//   jwt.verify(token, secret, {}, async (err, info) => {
 //     if (err) throw err;
-//     const {id,title,summary,content} = req.body;
+//     const { id, title, summary, content } = req.body;
 //     const postDoc = await Post.findById(id);
 //     const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
 //     if (!isAuthor) {
-//       return res.status(400).json('you are not the author');
+//       return res.status(400).json('You are not the author');
 //     }
-//     await postDoc.update({
+
+//     const updatedData = {
 //       title,
 //       summary,
 //       content,
-//       cover: newPath ? newPath : postDoc.cover,
-//     });
+//     };
 
+//     if (req.file) {
+//       updatedData.cover = req.file.path; // Update cover with Cloudinary path
+//     }
+
+//     await postDoc.update(updatedData);
 //     res.json(postDoc);
 //   });
-
 // });
 
-app.post('/post', upload.single('file'), async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-    const { title, summary, content } = req.body;
-    const postDoc = await Post.create({
-      title,
-      summary,
-      content,
-      cover: req.file.path, // Use the path returned by Cloudinary
-      author: info.id,
-    });
-    res.json(postDoc);
-  });
-});
 
-app.put('/post', upload.single('file'), async (req, res) => {
-  const { token } = req.cookies;
-  jwt.verify(token, secret, {}, async (err, info) => {
-    if (err) throw err;
-    const { id, title, summary, content } = req.body;
-    const postDoc = await Post.findById(id);
-    const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
-    if (!isAuthor) {
-      return res.status(400).json('You are not the author');
-    }
 
-    const updatedData = {
-      title,
-      summary,
-      content,
-    };
 
-    if (req.file) {
-      updatedData.cover = req.file.path; // Update cover with Cloudinary path
-    }
 
-    await postDoc.update(updatedData);
-    res.json(postDoc);
-  });
-});
 
 
 

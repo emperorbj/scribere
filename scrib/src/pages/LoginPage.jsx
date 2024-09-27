@@ -22,11 +22,16 @@ export default function LoginPage() {
     ev.preventDefault();
     setLoading(true);
     try {
+      // const response = await fetch('https://scriberebackend.vercel.app/login', {
+      //   method: 'POST',
+      //   body: JSON.stringify({ username, password }),
+      //   headers: { 'Content-Type': 'application/json' },
+      //   credentials: 'include',
+      // });
       const response = await fetch('https://scriberebackend.vercel.app/login', {
         method: 'POST',
-        body: JSON.stringify({ username, password }),
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        body: JSON.stringify({ username, password }),
       });
 
 
@@ -34,14 +39,18 @@ export default function LoginPage() {
 
 
       if (response.ok) {
-        response.json()
+        // response.json()
+        const data = await response.json()
+        .then(userInfo => {
+          setUserInfo(userInfo);
+          localStorage.setItem('token', data.token);
+          setRedirect(true);
+          console.log(response);;
+        
           // THE RESPONSE CONVERTED TO JSON AND THEN RESOLVED
           // AND SENT INTO A NEW VARIABLE userInfo(which has the same name as our 
           // global userInfo state variable)
-          .then(userInfo => {
-            setUserInfo(userInfo);
-            setRedirect(true);
-            console.log(response);
+          
 
           });
       } else {

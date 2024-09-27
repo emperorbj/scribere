@@ -17,14 +17,20 @@ export default function Header() {
     });
   }, []);
 
-  function logout() {
-    fetch('https://scriberebackend.vercel.app/logout', {
-      credentials: 'include',
-      method: 'POST',
-    });
-    setUserInfo(null);
-  }
+  // function logout() {
+  //   fetch('https://scriberebackend.vercel.app/logout', {
+  //     credentials: 'include',
+  //     method: 'POST',
+  //   });
+  //   setUserInfo(null);
+  // }
 
+  function logout() {
+    localStorage.removeItem('token');
+    // Optionally, you can also clear user info
+    // localStorage.removeItem('user');
+  }
+  
   // const username = userInfo?.username
   const username = userInfo?.username ? userInfo.username.slice(0, 2).toUpperCase() : null;
   
