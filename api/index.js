@@ -7,8 +7,7 @@ const bcrypt = require('bcryptjs');
 const app = express();
 app.use(cors({
   credentials: true,
-  //origin: ['https://scrib-eight.vercel.app'],
-  origin: "*", // Your frontend's URL without the trailing slash
+  origin: 'https://scrib-eight.vercel.app',
 }));
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
@@ -86,7 +85,7 @@ app.post('/login', async (req,res) => {
     jwt.sign({username, id:userDoc._id} , secret, {}, (err,token) => {
       if (err) throw err;
       // ELSE
-      res.cookie('token', token,{ httpOnly: true, secure: false }).json({
+      res.cookie('token', token,{ httpOnly: true, secure: true,  sameSite: 'None' }).json({
         id:userDoc._id,
         username,
       });
