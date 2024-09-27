@@ -26,7 +26,7 @@ export default function Post({ _id, title, summary, cover, content, createdAt, a
           </h2>
         </Link>
         <div className="text-sm text-gray-500 mt-2">
-          <span className="mr-2">{author.username}</span>
+          <span className="mr-2">{author?.username}</span>
           <time>{formatISO9075(new Date(createdAt))}</time>
         </div>
         <p className="mt-4 text-gray-700">
