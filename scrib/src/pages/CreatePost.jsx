@@ -54,7 +54,9 @@ export default function CreatePost() {
         onChange={ev => setFiles(ev.target.files)} />
       <Editor value={content} onChange={setContent} />
       <div className='flex items-center justify-center'>
-      <button className='bg-orange-400 p-4 w-44 text-white font-bold flex items-center justify-center' style={{ marginTop: '5px' }}
+      <button className='bg-orange-400 p-4 w-44 text-white 
+      font-bold flex 
+      items-center justify-center' style={{ marginTop: '5px' }}
       disabled={loading}>
         {loading ? (
             <AiOutlineLoading3Quarters className='animate-spin h-6 w-6' /> // <-- Spinner icon
